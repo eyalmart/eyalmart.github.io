@@ -1,5 +1,5 @@
 <!-- manifest.html -->
-<script type="application/json" id="manifest">
+<script type="application/manifest+json">
 {
   "name": "Eyal Mart",
   "short_name": "EyalMart",
@@ -7,14 +7,15 @@
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0d6efd",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "https://yourdomain.com/icon-192.png",
+      "src": "https://scontent.fmaa1-2.fna.fbcdn.net/v/t39.30808-6/486077406_639153202168145_8426415471083715606_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=833d8c&_nc_ohc=-U345jKLI1MQ7kNvwEmNQ2N&_nc_oc=Adk_NwJvG2oQF5DF777x93ALdVVx6FV1NkCMAwtGnBgTjF0eTV2jI1U0aj2qJLFXCiI&_nc_zt=23&_nc_ht=scontent.fmaa1-2.fna&_nc_gid=ELDvXIBI2hWxMxQn0uW-6g&oh=00_AfMWIVAoynOo5ebGSJzrV6VtW-XVPMSEOS0p3lgOtgqEeQ&oe=6851BBEF",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://yourdomain.com/icon-512.png",
+      "src": "https://scontent.fmaa1-2.fna.fbcdn.net/v/t39.30808-6/486077406_639153202168145_8426415471083715606_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=833d8c&_nc_ohc=-U345jKLI1MQ7kNvwEmNQ2N&_nc_oc=Adk_NwJvG2oQF5DF777x93ALdVVx6FV1NkCMAwtGnBgTjF0eTV2jI1U0aj2qJLFXCiI&_nc_zt=23&_nc_ht=scontent.fmaa1-2.fna&_nc_gid=ELDvXIBI2hWxMxQn0uW-6g&oh=00_AfMWIVAoynOo5ebGSJzrV6VtW-XVPMSEOS0p3lgOtgqEeQ&oe=6851BBEF",
       "sizes": "512x512",
       "type": "image/png"
     }
