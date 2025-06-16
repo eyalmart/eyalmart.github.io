@@ -1,6 +1,4 @@
 const DEPLOYMENT_URL = 'https://script.google.com/macros/s/AKfycbw9G5AbG1jv4HLUa_Q5NT6NBG3jvxkAbLzaem3J1GsUkzFN8G9ebhaOirmKQ4Z9oI0N/exec';
-const RAZORPAY_KEY = 'rzp_live_ma4VvXqWWfLwH2';
-
 let allProducts = [];
 let allAreas = [];
 let cart = JSON.parse(localStorage.getItem('eyal_cart') || '{}');
@@ -75,32 +73,28 @@ function checkout() {
   const mobile = document.getElementById('cust-mobile').value.trim();
   const area = document.getElementById('cust-area').value.trim();
   const note = document.getElementById('cust-note').value.trim();
-
   if (!name || !mobile || !area) return alert("Please fill all required fields.");
   if (!/^[0-9]{10}$/.test(mobile)) return alert("Enter valid 10-digit mobile number.");
 
   const total = Object.values(cart).reduce((sum, item) => sum + item.qty * item.price, 0);
-
   const options = {
-    key: RAZORPAY_KEY,
+    key: 'rzp_live_ma4VvXqWWfLwH2',
     amount: total * 100,
-    currency: "INR",
-    name: "Eyal Mart",
-    description: "Order Payment",
+    currency: 'INR',
+    name: 'Eyal Mart',
+    description: 'Order Payment',
     handler: function () {
-      const orderData = { name, mobile, area, note, cart, total };
-      localStorage.removeItem('eyal_cart');
       fetch(DEPLOYMENT_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData)
+        body: JSON.stringify({ action: 'submitOrder', name, mobile, area, note, cart, total }),
+        headers: { 'Content-Type': 'application/json' }
       }).then(() => {
+        localStorage.removeItem('eyal_cart');
         showThankYouModal(name, total, cart);
       });
     },
     prefill: { name, contact: mobile },
-    theme: { color: "#0d6efd" },
-    modal: { ondismiss: () => alert("Payment Cancelled") }
+    theme: { color: '#0d6efd' }
   };
   new Razorpay(options).open();
 }
@@ -117,9 +111,7 @@ function showThankYouModal(name, total, cartData) {
           <h4 class="text-success">✅ Order Confirmed!</h4>
           <p>Thank you <strong>${name}</strong></p>
           <p>Total Paid: <strong>₹${total}</strong></p>
-          <ul class="list-group mb-3">
-            ${Object.values(cartData).map(item => `<li class="list-group-item">${item.name} × ${item.qty} = ₹${item.qty * item.price}</li>`).join('')}
-          </ul>
+          <ul class="list-group mb-3">${Object.values(cartData).map(item => `<li class="list-group-item">${item.name} × ${item.qty} = ₹${item.qty * item.price}</li>`).join('')}</ul>
           <button class="btn btn-primary w-100" data-bs-dismiss="modal">Continue Shopping</button>
         </div>
       </div>
@@ -132,7 +124,7 @@ function displayProducts(products) {
   document.getElementById('spinner').classList.add('d-none');
   document.getElementById('main-container').classList.remove('d-none');
   allProducts = products;
-
+  const categories = [...new Set(products.map(p => p.Category))];
   const container = document.getElementById('categoryFilter');
   container.innerHTML = '';
 
@@ -147,7 +139,6 @@ function displayProducts(products) {
   };
   container.appendChild(allBtn);
 
-  const categories = [...new Set(products.map(p => p.Category))];
   categories.forEach(cat => {
     const btn = document.createElement('button');
     btn.className = 'btn btn-light category-btn';
@@ -165,7 +156,7 @@ function displayProducts(products) {
 }
 
 function categoryIcon(cat) {
-  if (cat.toLowerCase().includes('daily')) return '🧺';
+  if (cat.toLowerCase().includes('daily')) return '🍞';
   if (cat.toLowerCase().includes('electronics')) return '🔌';
   if (cat.toLowerCase().includes('footwear')) return '👟';
   if (cat.toLowerCase().includes('stationery')) return '✏️';
@@ -174,18 +165,15 @@ function categoryIcon(cat) {
 
 function applyFilters() {
   const keyword = document.getElementById('searchInput').value.toLowerCase();
-  const category = document.querySelector('.category-btn.active')?.dataset.cat || "";
+  const category = document.querySelector('.category-btn.active')?.dataset.cat || '';
   const sort = document.getElementById('priceSort').value;
-
   let filtered = allProducts.filter(p =>
     (!keyword || p.Name.toLowerCase().includes(keyword)) &&
     (!category || p.Category === category) &&
-    (parseInt(p.Stock) > 0)
+    parseInt(p.Stock) > 0
   );
-
   if (sort === 'asc') filtered.sort((a, b) => a.Price - b.Price);
   else if (sort === 'desc') filtered.sort((a, b) => b.Price - a.Price);
-
   const container = document.getElementById('product-list');
   container.innerHTML = '';
   filtered.forEach((p, index) => {
@@ -204,11 +192,8 @@ function applyFilters() {
               <button class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('qty-${p.ID}').stepUp()">＋</button>
               <button class="btn btn-success btn-sm ms-2" onclick="addToCart('${p.ID}', '${p.Name}', ${p.Price}, document.getElementById('qty-${p.ID}').value)">ADD TO CART</button>
             </div>
-            ${p.Description ? `
-              <a data-bs-toggle="collapse" href="#desc-${index}" role="button" class="small text-primary">🔽 More details</a>
-              <div class="collapse mt-1 small text-muted" id="desc-${index}">
-                ${p.Description}
-              </div>` : ''}
+            ${p.Description ? `<a data-bs-toggle="collapse" href="#desc-${index}" role="button" aria-expanded="false" class="small text-primary">🔽 More details</a>
+            <div class="collapse mt-1 small text-muted" id="desc-${index}">${p.Description}</div>` : ''}
           </div>
         </div>
       </div>`;
@@ -219,14 +204,17 @@ function applyFilters() {
 function loadProducts() {
   fetch(`${DEPLOYMENT_URL}?action=getProducts`)
     .then(res => res.json())
-    .then(displayProducts);
-
+    .then(products => displayProducts(products));
   fetch(`${DEPLOYMENT_URL}?action=getAreas`)
     .then(res => res.json())
-    .then(data => {
-      allAreas = data;
+    .then(areas => {
+      allAreas = areas;
       populateAreaDropdown();
     });
+}
+
+function refreshPage() {
+  window.location.reload();
 }
 
 window.onload = () => {
