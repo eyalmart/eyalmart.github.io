@@ -157,10 +157,10 @@ function displayProducts(products) {
 
 function categoryIcon(cat) {
   if (cat.toLowerCase().includes('daily')) return '🍞';
-  if (cat.toLowerCase().includes('electronics')) return '🔌';
-  if (cat.toLowerCase().includes('footwear')) return '👟';
-  if (cat.toLowerCase().includes('stationery')) return '✏️';
-  return '📦';
+  if (cat.toLowerCase().includes('electronics')) return '';
+  if (cat.toLowerCase().includes('footwear')) return '';
+  if (cat.toLowerCase().includes('stationery')) return '';
+  return '';
 }
 
 function applyFilters() {
