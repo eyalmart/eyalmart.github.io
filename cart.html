@@ -1,0 +1,29 @@
+<!-- cart.html -->
+<div class="modal fade" id="cartModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">🛒 Your Cart</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="cart-items"></div>
+        <hr>
+        <h6>Total: ₹<span id="cart-total">0</span></h6>
+
+        <input type="text" class="form-control mt-3" placeholder="Your Name" id="cust-name" required>
+        <input type="tel" class="form-control mt-2" placeholder="Your Mobile Number" maxlength="10" id="cust-mobile" required>
+
+        <select class="form-select mt-2" id="cust-area" required>
+          <option value="">Select Area</option>
+        </select>
+
+        <textarea class="form-control mt-2" id="cust-note" placeholder="Any notes (optional)..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-success" onclick="checkout()">Checkout</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,49 @@
+<!-- checkout.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Checkout - Eyal Mart</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="style.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="container mt-5">
+    <h4 class="mb-4 text-center">🛒 Checkout</h4>
+    
+    <div class="mb-3">
+      <label for="cust-name" class="form-label">Your Name</label>
+      <input type="text" class="form-control" id="cust-name" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="cust-mobile" class="form-label">Mobile Number</label>
+      <input type="tel" class="form-control" id="cust-mobile" maxlength="10" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="cust-area" class="form-label">Select Area</label>
+      <select class="form-select" id="cust-area" required>
+        <option value="">Loading...</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="cust-note" class="form-label">Note (Optional)</label>
+      <textarea class="form-control" id="cust-note" rows="3" placeholder="Anything we should know?"></textarea>
+    </div>
+
+    <h5 class="mt-4">Order Summary</h5>
+    <ul class="list-group mb-3" id="checkout-items"></ul>
+    <h6 class="text-end">Total: ₹<span id="checkout-total">0</span></h6>
+
+    <div class="d-grid mt-4">
+      <button class="btn btn-success" onclick="checkout()">Pay with Razorpay</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</body>
+</html>
