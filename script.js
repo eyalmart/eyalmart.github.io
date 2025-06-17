@@ -1,4 +1,4 @@
-const DEPLOYMENT_URL = 'https://script.google.com/macros/s/AKfycbw9G5AbG1jv4HLUa_Q5NT6NBG3jvxkAbLzaem3J1GsUkzFN8G9ebhaOirmKQ4Z9oI0N/exec'; // replace
+const DEPLOYMENT_URL = 'https://script.google.com/macros/s/AKfycbyLuncL2wLm9ka528KU4h8R5O6DmZRPQUQrq4xwpGQGuniitZhICdhJPW1oWGTudMZw/exec'; // replace
 
 let allProducts = [];
 let allAreas = [];
