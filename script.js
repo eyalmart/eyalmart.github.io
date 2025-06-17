@@ -78,32 +78,63 @@ function checkout() {
   const area = document.getElementById('cust-area').value.trim();
   const note = document.getElementById('cust-note').value.trim();
 
-  if (!name || !mobile || !area) return alert("Please fill all required fields.");
-  if (!/^[0-9]{10}$/.test(mobile)) return alert("Enter valid 10-digit mobile number.");
+  if (!name || !mobile || !area) {
+    alert("Please fill all required fields.");
+    return;
+  }
+  if (!/^[0-9]{10}$/.test(mobile)) {
+    alert("Enter a valid 10-digit mobile number.");
+    return;
+  }
 
   const total = Object.values(cart).reduce((sum, item) => sum + item.qty * item.price, 0);
-  const options = {
-    key: RAZORPAY_KEY,
+
+  const razorpayOptions = {
+    key: "rzp_live_xxxxxxxxxxx", // Replace with your live key
     amount: total * 100,
     currency: "INR",
     name: "Eyal Mart",
     description: "Order Payment",
-    handler: function () {
-      localStorage.removeItem('eyal_cart');
-      fetch(`${DEPLOYMENT_URL}?action=submitOrder`, {
-        method: 'POST',
-        body: JSON.stringify({ name, mobile, area, note, cart, total }),
-        headers: { 'Content-Type': 'application/json' }
-      }).then(() => {
-        showThankYouModal(name, total, cart);
-      }).catch(() => alert("❌ Order Failed!"));
-    },
     prefill: { name, contact: mobile },
     theme: { color: "#3399cc" },
-    modal: { ondismiss: () => alert("Payment Cancelled") }
+    modal: {
+      ondismiss: () => alert("Payment Cancelled")
+    },
+    handler: function () {
+      // Submit order after successful payment
+      fetch("https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name,
+          mobile,
+          area,
+          note,
+          cart,
+          total
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          showThankYouModal(name, total, cart);
+          localStorage.removeItem('eyal_cart');
+        } else {
+          alert("❌ Order failed: " + (data.error || "Unknown error"));
+        }
+      })
+      .catch(err => {
+        alert("❌ Network error while submitting order: " + err.message);
+        console.error(err);
+      });
+    }
   };
-  new Razorpay(options).open();
+
+  new Razorpay(razorpayOptions).open();
 }
+
 
 function showThankYouModal(name, total, cartData) {
   const modal = document.createElement('div');
