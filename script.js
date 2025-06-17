@@ -1,9 +1,8 @@
+const DEPLOYMENT_URL = 'https://script.google.com/macros/s/AKfycbw9G5AbG1jv4HLUa_Q5NT6NBG3jvxkAbLzaem3J1GsUkzFN8G9ebhaOirmKQ4Z9oI0N/exec'; // Replace with your own URL
+
 let allProducts = [];
 let allAreas = [];
 let cart = JSON.parse(localStorage.getItem('eyal_cart') || '{}');
-let deferredPrompt = null;
-const DEPLOYMENT_URL = 'https://script.google.com/macros/s/AKfycbw9G5AbG1jv4HLUa_Q5NT6NBG3jvxkAbLzaem3J1GsUkzFN8G9ebhaOirmKQ4Z9oI0N/exec';
-const RAZORPAY_KEY = 'rzp_live_ma4VvXqWWfLwH2'; // Replace with your Razorpay key
 
 function updateCartCount() {
   const count = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
@@ -80,30 +79,18 @@ function checkout() {
   if (!/^[0-9]{10}$/.test(mobile)) return alert("Enter valid 10-digit mobile number.");
 
   const total = Object.values(cart).reduce((sum, item) => sum + item.qty * item.price, 0);
-  const order = { name, mobile, area, note, cart, total };
-
   const options = {
-    key: RAZORPAY_KEY,
+    key: "rzp_live_ma4VvXqWWfLwH2", // Replace with your Razorpay live key
     amount: total * 100,
     currency: "INR",
     name: "Eyal Mart",
     description: "Order Payment",
     handler: function () {
-      fetch(`${DEPLOYMENT_URL}`, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'submitOrder', order }),
-        headers: { 'Content-Type': 'application/json' }
-      })
-      .then(res => res.text())
-      .then(() => {
-        localStorage.removeItem('eyal_cart');
-        showThankYouModal(name, total, cart);
-        cart = {};
-        updateCartCount();
-      })
-      .catch(() => {
-        alert("Order failed. Please contact support.");
-      });
+      localStorage.removeItem('eyal_cart');
+      fetch(`${DEPLOYMENT_URL}?action=submitOrder&order=${encodeURIComponent(JSON.stringify({ name, mobile, area, note, cart, total }))}`)
+        .then(res => res.json())
+        .then(() => showThankYouModal(name, total, cart))
+        .catch(err => alert("Order failed. Please try again."));
     },
     prefill: { name, contact: mobile },
     theme: { color: "#3399cc" },
@@ -124,10 +111,9 @@ function showThankYouModal(name, total, cartData) {
           <h4 class="text-success">✅ Order Confirmed!</h4>
           <p>Thank you <strong>${name}</strong></p>
           <p>Total Paid: <strong>₹${total}</strong></p>
-          <ul class="list-group mb-3">
-            ${Object.values(cartData).map(item => `<li class="list-group-item">${item.name} × ${item.qty} = ₹${item.qty * item.price}</li>`).join('')}
-          </ul>
-          <button class="btn btn-primary w-100" data-bs-dismiss="modal" onclick="location.reload()">Continue Shopping</button>
+          <ul class="list-group mb-3">${Object.values(cartData).map(item =>
+    `<li class="list-group-item">${item.name} × ${item.qty} = ₹${item.qty * item.price}</li>`).join('')}</ul>
+          <button class="btn btn-primary w-100" data-bs-dismiss="modal">Continue Shopping</button>
         </div>
       </div>
     </div>`;
@@ -135,15 +121,25 @@ function showThankYouModal(name, total, cartData) {
   new bootstrap.Modal(modal).show();
 }
 
+function categoryIcon(cat) {
+  if (cat.toLowerCase().includes('daily')) return '🍞';
+  if (cat.toLowerCase().includes('electronics')) return '🔌';
+  if (cat.toLowerCase().includes('footwear')) return '👟';
+  return '📦';
+}
+
 function displayProducts(products) {
+  document.getElementById('spinner').classList.add('d-none');
+  document.getElementById('main-container').classList.remove('d-none');
   allProducts = products;
+
   const categories = [...new Set(products.map(p => p.Category))];
   const container = document.getElementById('categoryFilter');
   container.innerHTML = '';
 
   const allBtn = document.createElement('button');
   allBtn.className = 'btn btn-light category-btn active';
-  allBtn.innerHTML = `All`;
+  allBtn.innerHTML = `<span class='me-1'>📦</span>All`;
   allBtn.dataset.cat = '';
   allBtn.onclick = () => {
     document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
@@ -155,7 +151,7 @@ function displayProducts(products) {
   categories.forEach(cat => {
     const btn = document.createElement('button');
     btn.className = 'btn btn-light category-btn';
-    btn.innerHTML = `${cat}`;
+    btn.innerHTML = `<span class='me-1'>${categoryIcon(cat)}</span>${cat}`;
     btn.dataset.cat = cat;
     btn.onclick = () => {
       document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
@@ -176,7 +172,7 @@ function applyFilters() {
   let filtered = allProducts.filter(p =>
     (!keyword || p.Name.toLowerCase().includes(keyword)) &&
     (!category || p.Category === category) &&
-    parseInt(p.Stock) > 0
+    (parseInt(p.Stock) > 0)
   );
 
   if (sort === 'asc') filtered.sort((a, b) => a.Price - b.Price);
@@ -201,10 +197,11 @@ function applyFilters() {
               <button class="btn btn-success btn-sm ms-2" onclick="addToCart('${p.ID}', '${p.Name}', ${p.Price}, document.getElementById('qty-${p.ID}').value)">ADD TO CART</button>
             </div>
             ${p.Description ? `
-              <a data-bs-toggle="collapse" href="#desc-${index}" role="button" class="small text-primary">🔽 More details</a>
+              <a data-bs-toggle="collapse" href="#desc-${index}" role="button" aria-expanded="false" class="small text-primary">🔽 More details</a>
               <div class="collapse mt-1 small text-muted" id="desc-${index}">
                 ${p.Description}
-              </div>` : ''}
+              </div>
+            ` : ''}
           </div>
         </div>
       </div>`;
@@ -212,46 +209,43 @@ function applyFilters() {
   });
 }
 
-function populateAreas(areas) {
-  allAreas = areas;
-  populateAreaDropdown();
-}
-
 function loadProducts() {
   fetch(`${DEPLOYMENT_URL}?action=getProducts`)
     .then(res => res.json())
-    .then(displayProducts);
+    .then(displayProducts)
+    .catch(() => alert("Failed to load products"));
 
   fetch(`${DEPLOYMENT_URL}?action=getAreas`)
     .then(res => res.json())
-    .then(populateAreas);
+    .then(data => {
+      allAreas = data;
+      populateAreaDropdown();
+    })
+    .catch(() => alert("Failed to load areas"));
+}
+
+// PWA INSTALL PROMPT
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById("install-btn").style.display = 'inline-block';
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choice => {
+      if (choice.outcome === 'accepted') {
+        console.log('✅ User installed the app');
+        deferredPrompt = null;
+        document.getElementById("install-btn").style.display = 'none';
+      }
+    });
+  }
 }
 
 window.onload = () => {
   updateCartCount();
   loadProducts();
-
-  // PWA install button
-  const installBtn = document.getElementById('install-btn');
-  if ('beforeinstallprompt' in window) {
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      if (installBtn) installBtn.style.display = 'inline-block';
-    });
-  }
-
-  if (installBtn) {
-    installBtn.addEventListener('click', () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(choice => {
-          if (choice.outcome === 'accepted') {
-            installBtn.style.display = 'none';
-          }
-          deferredPrompt = null;
-        });
-      }
-    });
-  }
-};
+}
