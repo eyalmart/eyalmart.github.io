@@ -1,22 +1,4 @@
 {
-  "timeZone": "Asia/Kolkata",
-  "dependencies": {},
-  "exceptionLogging": "STACKDRIVER",
-  "runtimeVersion": "V8",
-  "webapp": {
-    "access": "ANYONE",
-    "executeAs": "USER_DEPLOYING"
-  },
-  "oauthScopes": [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/script.external_request"
-    // Add other scopes if your app ever needs them, like:
-    // "https://www.googleapis.com/auth/script.send_mail",
-    // "https://www.googleapis.com/auth/drive.file"
-  ]
-}
-
-{
   "name": "Eyal Mart",
   "short_name": "EyalMart",
   "start_url": "/",
@@ -28,12 +10,20 @@
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable" // Added purpose for better PWA icon handling
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable" // Added purpose
+    },
+    {
+      "src": "icon-maskable-512x512.png", // Consider adding a dedicated maskable icon
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
