@@ -143,7 +143,7 @@ function displayProducts(products) {
 
   const allBtn = document.createElement('button');
   allBtn.className = 'btn btn-light category-btn active';
-  allBtn.innerHTML = `📦 All`;
+  allBtn.innerHTML = `All`;
   allBtn.dataset.cat = '';
   allBtn.onclick = () => {
     document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
