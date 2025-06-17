@@ -1,18 +1,17 @@
 let allProducts = [];
 let allAreas = [];
-let cart = JSON.parse(localStorage.getItem("eyal_cart") || "{}");
-let deferredPrompt;
-
-// ✅ Update this to your live Apps Script Web App URL:
-const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw9G5AbG1jv4HLUa_Q5NT6NBG3jvxkAbLzaem3J1GsUkzFN8G9ebhaOirmKQ4Z9oI0N/exec';
+let cart = JSON.parse(localStorage.getItem('eyal_cart') || '{}');
+let deferredPrompt = null;
+const DEPLOYMENT_URL = 'https://script.google.com/macros/s/AKfycbw9G5AbG1jv4HLUa_Q5NT6NBG3jvxkAbLzaem3J1GsUkzFN8G9ebhaOirmKQ4Z9oI0N/exec';
+const RAZORPAY_KEY = 'rzp_live_ma4VvXqWWfLwH2'; // Replace with your Razorpay key
 
 function updateCartCount() {
   const count = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
-  document.getElementById("cart-count").innerText = count;
+  document.getElementById('cart-count').innerText = count;
 }
 
 function saveCart() {
-  localStorage.setItem("eyal_cart", JSON.stringify(cart));
+  localStorage.setItem('eyal_cart', JSON.stringify(cart));
 }
 
 function addToCart(id, name, price, qty) {
@@ -21,7 +20,7 @@ function addToCart(id, name, price, qty) {
   else cart[id].qty += qty;
   saveCart();
   updateCartCount();
-  alert("Added to cart");
+  alert('Added to cart');
 }
 
 function increaseQty(id) {
@@ -38,9 +37,9 @@ function decreaseQty(id) {
 }
 
 function showCartModal() {
-  const items = document.getElementById("cart-items");
-  const totalDisplay = document.getElementById("cart-total");
-  items.innerHTML = "";
+  const items = document.getElementById('cart-items');
+  const totalDisplay = document.getElementById('cart-total');
+  items.innerHTML = '';
   let total = 0;
   for (let id in cart) {
     const item = cart[id];
@@ -57,14 +56,14 @@ function showCartModal() {
       </div>`;
   }
   totalDisplay.innerText = total;
-  new bootstrap.Modal(document.getElementById("cartModal")).show();
+  new bootstrap.Modal(document.getElementById('cartModal')).show();
 }
 
 function populateAreaDropdown() {
-  const select = document.getElementById("cust-area");
+  const select = document.getElementById('cust-area');
   select.innerHTML = `<option value="">Select Area</option>`;
-  allAreas.forEach((area) => {
-    const option = document.createElement("option");
+  allAreas.forEach(area => {
+    const option = document.createElement('option');
     option.value = area;
     option.innerText = area;
     select.appendChild(option);
@@ -72,54 +71,51 @@ function populateAreaDropdown() {
 }
 
 function checkout() {
-  const name = document.getElementById("cust-name").value.trim();
-  const mobile = document.getElementById("cust-mobile").value.trim();
-  const area = document.getElementById("cust-area").value.trim();
-  const note = document.getElementById("cust-note").value.trim();
+  const name = document.getElementById('cust-name').value.trim();
+  const mobile = document.getElementById('cust-mobile').value.trim();
+  const area = document.getElementById('cust-area').value.trim();
+  const note = document.getElementById('cust-note').value.trim();
 
   if (!name || !mobile || !area) return alert("Please fill all required fields.");
   if (!/^[0-9]{10}$/.test(mobile)) return alert("Enter valid 10-digit mobile number.");
+
   const total = Object.values(cart).reduce((sum, item) => sum + item.qty * item.price, 0);
+  const order = { name, mobile, area, note, cart, total };
 
   const options = {
-    key: "rzp_live_ma4VvXqWWfLwH2", // 🔁 Replace with your Razorpay key
+    key: RAZORPAY_KEY,
     amount: total * 100,
     currency: "INR",
     name: "Eyal Mart",
     description: "Order Payment",
     handler: function () {
-      // ✅ Send order to Apps Script after successful payment
-      fetch(APP_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, mobile, area, note, cart, total }),
+      fetch(`${DEPLOYMENT_URL}`, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'submitOrder', order }),
+        headers: { 'Content-Type': 'application/json' }
       })
-        .then((res) => res.text())
-        .then((res) => {
-          if (res === "OK") {
-            localStorage.removeItem("eyal_cart");
-            showThankYouModal(name, total, cart);
-          } else {
-            alert("❌ Order failed: " + res);
-          }
-        })
-        .catch((err) => {
-          console.error("POST error", err);
-          alert("❌ Order failed. Please try again.");
-        });
+      .then(res => res.text())
+      .then(() => {
+        localStorage.removeItem('eyal_cart');
+        showThankYouModal(name, total, cart);
+        cart = {};
+        updateCartCount();
+      })
+      .catch(() => {
+        alert("Order failed. Please contact support.");
+      });
     },
     prefill: { name, contact: mobile },
     theme: { color: "#3399cc" },
-    modal: { ondismiss: () => alert("Payment Cancelled") },
+    modal: { ondismiss: () => alert("Payment Cancelled") }
   };
-
   new Razorpay(options).open();
 }
 
 function showThankYouModal(name, total, cartData) {
-  const modal = document.createElement("div");
-  modal.className = "modal fade";
-  modal.id = "thankYouModal";
+  const modal = document.createElement('div');
+  modal.className = 'modal fade';
+  modal.id = 'thankYouModal';
   modal.tabIndex = -1;
   modal.innerHTML = `
     <div class="modal-dialog modal-dialog-centered">
@@ -129,11 +125,9 @@ function showThankYouModal(name, total, cartData) {
           <p>Thank you <strong>${name}</strong></p>
           <p>Total Paid: <strong>₹${total}</strong></p>
           <ul class="list-group mb-3">
-            ${Object.values(cartData)
-              .map((item) => `<li class="list-group-item">${item.name} × ${item.qty} = ₹${item.qty * item.price}</li>`)
-              .join("")}
+            ${Object.values(cartData).map(item => `<li class="list-group-item">${item.name} × ${item.qty} = ₹${item.qty * item.price}</li>`).join('')}
           </ul>
-          <button class="btn btn-primary w-100" data-bs-dismiss="modal">Continue Shopping</button>
+          <button class="btn btn-primary w-100" data-bs-dismiss="modal" onclick="location.reload()">Continue Shopping</button>
         </div>
       </div>
     </div>`;
@@ -142,33 +136,30 @@ function showThankYouModal(name, total, cartData) {
 }
 
 function displayProducts(products) {
-  document.getElementById("spinner").classList.add("d-none");
-  document.getElementById("main-container").classList.remove("d-none");
   allProducts = products;
+  const categories = [...new Set(products.map(p => p.Category))];
+  const container = document.getElementById('categoryFilter');
+  container.innerHTML = '';
 
-  const categories = [...new Set(products.map((p) => p.Category))];
-  const container = document.getElementById("categoryFilter");
-  container.innerHTML = "";
-
-  const allBtn = document.createElement("button");
-  allBtn.className = "btn btn-light category-btn active";
-  allBtn.innerHTML = `<span class='me-1'>📦</span>All`;
-  allBtn.dataset.cat = "";
+  const allBtn = document.createElement('button');
+  allBtn.className = 'btn btn-light category-btn active';
+  allBtn.innerHTML = `📦 All`;
+  allBtn.dataset.cat = '';
   allBtn.onclick = () => {
-    document.querySelectorAll(".category-btn").forEach((b) => b.classList.remove("active"));
-    allBtn.classList.add("active");
+    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+    allBtn.classList.add('active');
     applyFilters();
   };
   container.appendChild(allBtn);
 
-  categories.forEach((cat) => {
-    const btn = document.createElement("button");
-    btn.className = "btn btn-light category-btn";
-    btn.innerHTML = `<span class='me-1'>${categoryIcon(cat)}</span>${cat}`;
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-light category-btn';
+    btn.innerHTML = `${cat}`;
     btn.dataset.cat = cat;
     btn.onclick = () => {
-      document.querySelectorAll(".category-btn").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
+      document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
       applyFilters();
     };
     container.appendChild(btn);
@@ -177,37 +168,29 @@ function displayProducts(products) {
   applyFilters();
 }
 
-function categoryIcon(cat) {
-  if (cat.toLowerCase().includes("daily")) return "🧺";
-  if (cat.toLowerCase().includes("electronics")) return "";
-  if (cat.toLowerCase().includes("footwear")) return "";
-  if (cat.toLowerCase().includes("stationery")) return "✏";
-  return "📦";
-}
-
 function applyFilters() {
-  const keyword = document.getElementById("searchInput").value.toLowerCase();
-  const category = document.querySelector(".category-btn.active")?.dataset.cat || "";
-  const sort = document.getElementById("priceSort").value;
+  const keyword = document.getElementById('searchInput').value.toLowerCase();
+  const category = document.querySelector('.category-btn.active')?.dataset.cat || "";
+  const sort = document.getElementById('priceSort').value;
 
-  let filtered = allProducts.filter((p) =>
+  let filtered = allProducts.filter(p =>
     (!keyword || p.Name.toLowerCase().includes(keyword)) &&
     (!category || p.Category === category) &&
     parseInt(p.Stock) > 0
   );
 
-  if (sort === "asc") filtered.sort((a, b) => a.Price - b.Price);
-  else if (sort === "desc") filtered.sort((a, b) => b.Price - a.Price);
+  if (sort === 'asc') filtered.sort((a, b) => a.Price - b.Price);
+  else if (sort === 'desc') filtered.sort((a, b) => b.Price - a.Price);
 
-  const container = document.getElementById("product-list");
-  container.innerHTML = "";
+  const container = document.getElementById('product-list');
+  container.innerHTML = '';
   filtered.forEach((p, index) => {
-    const col = document.createElement("div");
-    col.className = "col-md-6 col-lg-4 mb-3";
+    const col = document.createElement('div');
+    col.className = 'col-md-6 col-lg-4 mb-3';
     col.innerHTML = `
       <div class="product-card">
         <div class="d-flex align-items-start gap-3">
-          <img src="${p["Image URL"]}" alt="${p.Name}" class="product-image">
+          <img src="${p['Image URL']}" alt="${p.Name}" class="product-image">
           <div class="product-info">
             <h6 class="product-name">${p.Name}</h6>
             <div class="product-price">₹${p.Price}</div>
@@ -221,7 +204,7 @@ function applyFilters() {
               <a data-bs-toggle="collapse" href="#desc-${index}" role="button" class="small text-primary">🔽 More details</a>
               <div class="collapse mt-1 small text-muted" id="desc-${index}">
                 ${p.Description}
-              </div>` : ""}
+              </div>` : ''}
           </div>
         </div>
       </div>`;
@@ -229,43 +212,46 @@ function applyFilters() {
   });
 }
 
-function fetchProductsAndAreas() {
-  fetch(APP_SCRIPT_URL + "?type=products")
-    .then((res) => res.json())
+function populateAreas(areas) {
+  allAreas = areas;
+  populateAreaDropdown();
+}
+
+function loadProducts() {
+  fetch(`${DEPLOYMENT_URL}?action=getProducts`)
+    .then(res => res.json())
     .then(displayProducts);
 
-  fetch(APP_SCRIPT_URL + "?type=areas")
-    .then((res) => res.json())
-    .then((areas) => {
-      allAreas = areas;
-      populateAreaDropdown();
-    });
+  fetch(`${DEPLOYMENT_URL}?action=getAreas`)
+    .then(res => res.json())
+    .then(populateAreas);
 }
 
 window.onload = () => {
   updateCartCount();
-  fetchProductsAndAreas();
+  loadProducts();
 
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js");
+  // PWA install button
+  const installBtn = document.getElementById('install-btn');
+  if ('beforeinstallprompt' in window) {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (installBtn) installBtn.style.display = 'inline-block';
+    });
+  }
+
+  if (installBtn) {
+    installBtn.addEventListener('click', () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(choice => {
+          if (choice.outcome === 'accepted') {
+            installBtn.style.display = 'none';
+          }
+          deferredPrompt = null;
+        });
+      }
+    });
   }
 };
-
-// PWA Install Prompt
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  const installBtn = document.getElementById("installAppBtn");
-  if (installBtn) installBtn.style.display = "inline-block";
-
-  installBtn.onclick = () => {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choice) => {
-      if (choice.outcome === "accepted") {
-        console.log("✅ App installed");
-      }
-      deferredPrompt = null;
-      installBtn.style.display = "none";
-    });
-  };
-});
