@@ -90,7 +90,7 @@ function checkout() {
   const total = Object.values(cart).reduce((sum, item) => sum + item.qty * item.price, 0);
 
   const razorpayOptions = {
-    key: "rzp_live_xxxxxxxxxxx", // Replace with your live key
+    key: "rzp_live_ma4VvXqWWfLwH2", // Replace with your live key
     amount: total * 100,
     currency: "INR",
     name: "Eyal Mart",
@@ -102,7 +102,7 @@ function checkout() {
     },
     handler: function () {
       // Submit order after successful payment
-      fetch("https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec", {
+      fetch("https://script.google.com/macros/s/AKfycbw9G5AbG1jv4HLUa_Q5NT6NBG3jvxkAbLzaem3J1GsUkzFN8G9ebhaOirmKQ4Z9oI0N/exec", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
