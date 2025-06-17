@@ -1,4 +1,21 @@
 {
+  "timeZone": "Asia/Kolkata",
+  "dependencies": {},
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "webapp": {
+    "access": "ANYONE",
+    "executeAs": "USER_DEPLOYING"
+  },
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/script.external_request",
+    "https://www.googleapis.com/auth/script.send_mail", // If you ever add email functionality
+    "https://www.googleapis.com/auth/drive.file" // If you're creating/modifying files beyond current sheet
+  ]
+}
+
+{
   "name": "Eyal Mart",
   "short_name": "EyalMart",
   "start_url": "/",
