@@ -1,8 +1,11 @@
-const DEPLOYMENT_URL = 'https://script.google.com/macros/s/AKfycbw9G5AbG1jv4HLUa_Q5NT6NBG3jvxkAbLzaem3J1GsUkzFN8G9ebhaOirmKQ4Z9oI0N/exec'; // Replace with your own URL
+// Replace with your actual deployed Apps Script Web App URL and Razorpay key
+const DEPLOYMENT_URL = "https://script.google.com/macros/s/AKfycbw9G5AbG1jv4HLUa_Q5NT6NBG3jvxkAbLzaem3J1GsUkzFN8G9ebhaOirmKQ4Z9oI0N/exec";
+const RAZORPAY_KEY = "rzp_live_ma4VvXqWWfLwH2";
 
 let allProducts = [];
 let allAreas = [];
 let cart = JSON.parse(localStorage.getItem('eyal_cart') || '{}');
+let deferredPrompt;
 
 function updateCartCount() {
   const count = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
@@ -80,17 +83,20 @@ function checkout() {
 
   const total = Object.values(cart).reduce((sum, item) => sum + item.qty * item.price, 0);
   const options = {
-    key: "rzp_live_ma4VvXqWWfLwH2", // Replace with your Razorpay live key
+    key: RAZORPAY_KEY,
     amount: total * 100,
     currency: "INR",
     name: "Eyal Mart",
     description: "Order Payment",
     handler: function () {
       localStorage.removeItem('eyal_cart');
-      fetch(`${DEPLOYMENT_URL}?action=submitOrder&order=${encodeURIComponent(JSON.stringify({ name, mobile, area, note, cart, total }))}`)
-        .then(res => res.json())
-        .then(() => showThankYouModal(name, total, cart))
-        .catch(err => alert("Order failed. Please try again."));
+      fetch(`${DEPLOYMENT_URL}?action=submitOrder`, {
+        method: 'POST',
+        body: JSON.stringify({ name, mobile, area, note, cart, total }),
+        headers: { 'Content-Type': 'application/json' }
+      }).then(() => {
+        showThankYouModal(name, total, cart);
+      }).catch(() => alert("❌ Order Failed!"));
     },
     prefill: { name, contact: mobile },
     theme: { color: "#3399cc" },
@@ -111,21 +117,13 @@ function showThankYouModal(name, total, cartData) {
           <h4 class="text-success">✅ Order Confirmed!</h4>
           <p>Thank you <strong>${name}</strong></p>
           <p>Total Paid: <strong>₹${total}</strong></p>
-          <ul class="list-group mb-3">${Object.values(cartData).map(item =>
-    `<li class="list-group-item">${item.name} × ${item.qty} = ₹${item.qty * item.price}</li>`).join('')}</ul>
+          <ul class="list-group mb-3">${Object.values(cartData).map(item => `<li class="list-group-item">${item.name} × ${item.qty} = ₹${item.qty * item.price}</li>`).join('')}</ul>
           <button class="btn btn-primary w-100" data-bs-dismiss="modal">Continue Shopping</button>
         </div>
       </div>
     </div>`;
   document.body.appendChild(modal);
   new bootstrap.Modal(modal).show();
-}
-
-function categoryIcon(cat) {
-  if (cat.toLowerCase().includes('daily')) return '🍞';
-  if (cat.toLowerCase().includes('electronics')) return '🔌';
-  if (cat.toLowerCase().includes('footwear')) return '👟';
-  return '📦';
 }
 
 function displayProducts(products) {
@@ -164,6 +162,13 @@ function displayProducts(products) {
   applyFilters();
 }
 
+function categoryIcon(cat) {
+  if (cat.toLowerCase().includes('daily')) return '🛒';
+  if (cat.toLowerCase().includes('electronics')) return '🔌';
+  if (cat.toLowerCase().includes('footwear')) return '👟';
+  return '📦';
+}
+
 function applyFilters() {
   const keyword = document.getElementById('searchInput').value.toLowerCase();
   const category = document.querySelector('.category-btn.active')?.dataset.cat || "";
@@ -198,9 +203,7 @@ function applyFilters() {
             </div>
             ${p.Description ? `
               <a data-bs-toggle="collapse" href="#desc-${index}" role="button" aria-expanded="false" class="small text-primary">🔽 More details</a>
-              <div class="collapse mt-1 small text-muted" id="desc-${index}">
-                ${p.Description}
-              </div>
+              <div class="collapse mt-1 small text-muted" id="desc-${index}">${p.Description}</div>
             ` : ''}
           </div>
         </div>
@@ -210,37 +213,31 @@ function applyFilters() {
 }
 
 function loadProducts() {
-  fetch(`${DEPLOYMENT_URL}?action=getProducts`)
-    .then(res => res.json())
-    .then(displayProducts)
-    .catch(() => alert("Failed to load products"));
-
-  fetch(`${DEPLOYMENT_URL}?action=getAreas`)
-    .then(res => res.json())
-    .then(data => {
-      allAreas = data;
-      populateAreaDropdown();
-    })
-    .catch(() => alert("Failed to load areas"));
+  fetch(`${DEPLOYMENT_URL}?action=getProducts`).then(res => res.json()).then(displayProducts);
+  fetch(`${DEPLOYMENT_URL}?action=getAreas`).then(res => res.json()).then(areas => {
+    allAreas = areas;
+    populateAreaDropdown();
+  });
 }
 
-// PWA INSTALL PROMPT
-let deferredPrompt;
+function refreshPage() {
+  location.reload();
+}
+
+// Handle PWA Install Prompt
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  document.getElementById("install-btn").style.display = 'inline-block';
+  document.getElementById('installPrompt').classList.remove('d-none');
 });
 
-function installApp() {
+function triggerInstall() {
   if (deferredPrompt) {
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then(choice => {
-      if (choice.outcome === 'accepted') {
-        console.log('✅ User installed the app');
-        deferredPrompt = null;
-        document.getElementById("install-btn").style.display = 'none';
-      }
+      if (choice.outcome === 'accepted') console.log("App Installed");
+      deferredPrompt = null;
+      document.getElementById('installPrompt').classList.add('d-none');
     });
   }
 }
@@ -248,4 +245,4 @@ function installApp() {
 window.onload = () => {
   updateCartCount();
   loadProducts();
-}
+};
