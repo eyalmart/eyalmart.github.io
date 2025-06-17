@@ -137,7 +137,7 @@ function displayProducts(products) {
 
   const allBtn = document.createElement('button');
   allBtn.className = 'btn btn-light category-btn active';
-  allBtn.innerHTML = `<span class='me-1'>📦</span>All`;
+  allBtn.innerHTML = `<span class='me-1'></span>All`;
   allBtn.dataset.cat = '';
   allBtn.onclick = () => {
     document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
@@ -163,10 +163,10 @@ function displayProducts(products) {
 }
 
 function categoryIcon(cat) {
-  if (cat.toLowerCase().includes('daily')) return '🛒';
-  if (cat.toLowerCase().includes('electronics')) return '🔌';
-  if (cat.toLowerCase().includes('footwear')) return '👟';
-  return '📦';
+  if (cat.toLowerCase().includes('daily')) return '';
+  if (cat.toLowerCase().includes('electronics')) return '';
+  if (cat.toLowerCase().includes('footwear')) return '';
+  return '';
 }
 
 function applyFilters() {
