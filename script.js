@@ -205,43 +205,30 @@ function checkout() {
 
 /**
  * Sends the order details to the Google Apps Script backend.
- * This function is modified to handle HTML-wrapped JSON responses.
  * @param {object} orderDetails - Object containing customer and cart information.
  */
 function sendOrderToSheet(orderDetails) {
+  // Show a loading indicator if you have one, or disable the checkout button temporarily
   showToast("Submitting order...", 'info');
 
   fetch(DEPLOYMENT_URL, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json" // Still send this, as the backend expects JSON input
+      "Content-Type": "application/json" // Crucial header for JSON payload
     },
     body: JSON.stringify(orderDetails)
   })
   .then(response => {
+    // Check if the HTTP response itself was successful (status code 2xx)
     if (!response.ok) {
-      return response.text().then(text => { // Get full text of error response
+      // Attempt to read the error message from the response body
+      return response.text().then(text => {
         throw new Error(`HTTP error! Status: ${response.status}, Response: ${text}`);
       });
     }
-    return response.text(); // *** MODIFICATION: Get response as text, not JSON directly ***
+    return response.json(); // Parse the JSON response
   })
-  .then(responseText => {
-    // *** MODIFICATION: Extract JSON string from HTML body and parse it ***
-    const jsonMatch = responseText.match(/<body>([\s\S]*)<\/body>/);
-    let data;
-    if (jsonMatch && jsonMatch[1]) {
-      try {
-        data = JSON.parse(jsonMatch[1]);
-      } catch (e) {
-        console.error("Error parsing JSON from HTML response:", e, "Raw responseText:", responseText);
-        throw new Error("Invalid JSON response from server. Check backend logs.");
-      }
-    } else {
-      console.error("Could not find JSON in HTML body. Raw responseText:", responseText);
-      throw new Error("Unexpected response format from server. HTML body not found.");
-    }
-
+  .then(data => {
     if (data.success) {
       localStorage.removeItem("eyal_cart"); // Clear cart from localStorage
       cart = {}; // Clear in-memory cart
@@ -406,36 +393,17 @@ function applyFilters() {
 
 /**
  * Fetches products and areas data from the Google Apps Script backend.
- * This function is modified to handle HTML-wrapped JSON responses.
  */
 function loadProducts() {
   // Fetch products
   fetch(`${DEPLOYMENT_URL}?action=getProducts`)
     .then(res => {
       if (!res.ok) {
-        return res.text().then(text => { // Get full text of error response
-          throw new Error(`HTTP error! Status: ${res.status}, Response: ${text}`);
-        });
+        throw new Error(`HTTP error! status: ${res.status}`);
       }
-      return res.text(); // *** MODIFICATION: Get response as text ***
+      return res.json();
     })
-    .then(responseText => {
-      // *** MODIFICATION: Extract JSON string from HTML body and parse it ***
-      const jsonMatch = responseText.match(/<body>([\s\S]*)<\/body>/);
-      let data;
-      if (jsonMatch && jsonMatch[1]) {
-        try {
-          data = JSON.parse(jsonMatch[1]);
-        } catch (e) {
-          console.error("Error parsing JSON from HTML response in loadProducts:", e, "Raw responseText:", responseText);
-          throw new Error("Invalid JSON response from server. Check backend logs.");
-        }
-      } else {
-        console.error("Could not find JSON in HTML body in loadProducts. Raw responseText:", responseText);
-        throw new Error("Unexpected response format from server. HTML body not found.");
-      }
-      displayProducts(data); // Call displayProducts with the parsed data
-    })
+    .then(displayProducts)
     .catch(err => {
       console.error("Error loading products:", err);
       showToast("Failed to load products. Please check your internet connection.", 'error');
@@ -447,28 +415,12 @@ function loadProducts() {
   fetch(`${DEPLOYMENT_URL}?action=getAreas`)
     .then(res => {
       if (!res.ok) {
-        return res.text().then(text => { // Get full text of error response
-          throw new Error(`HTTP error! Status: ${res.status}, Response: ${text}`);
-        });
+        throw new Error(`HTTP error! status: ${res.status}`);
       }
-      return res.text(); // *** MODIFICATION: Get response as text ***
+      return res.json();
     })
-    .then(responseText => {
-      // *** MODIFICATION: Extract JSON string from HTML body and parse it ***
-      const jsonMatch = responseText.match(/<body>([\s\S]*)<\/body>/);
-      let data;
-      if (jsonMatch && jsonMatch[1]) {
-        try {
-          data = JSON.parse(jsonMatch[1]);
-        } catch (e) {
-          console.error("Error parsing JSON from HTML response in loadAreas:", e, "Raw responseText:", responseText);
-          throw new Error("Invalid JSON response from server. Check backend logs.");
-        }
-      } else {
-        console.error("Could not find JSON in HTML body in loadAreas. Raw responseText:", responseText);
-        throw new Error("Unexpected response format from server. HTML body not found.");
-      }
-      allAreas = data;
+    .then(areas => {
+      allAreas = areas;
       populateAreaDropdown();
     })
     .catch(err => {
@@ -513,3 +465,4 @@ window.onload = () => {
   updateCartCount(); // Initialize cart count on load
   loadProducts();    // Load products and areas from backend
 };
+
