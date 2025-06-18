@@ -5,7 +5,7 @@
 const DEPLOYMENT_URL = "https://script.google.com/macros/s/AKfycbyLuncL2wLm9ka528KU4h8R5O6DmZRPQUQrq4xwpGQGuniitZhICdhJPW1oWGTudMZw/exec";
 
 // IMPORTANT: Replace with your Razorpay Key ID (rzp_live_ or rzp_test_).
-const RAZORPAY_KEY = "rzp_live_xxxxxxxxxx";
+const RAZORPAY_KEY = "rzp_live_ma4VvXqWWfLwH2";
 
 // --- Global Variables ---
 let allProducts = []; // Stores all products fetched from the backend
