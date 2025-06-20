@@ -1,26 +1,26 @@
-<!-- cart.html -->
-<div class="modal fade" id="cartModal" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">🛒 Your Cart</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <div id="cart-items"></div>
-        <hr>
-        <h6>Total: ₹<span id="cart-total">0</span></h6>
-        <input class="form-control mt-3" placeholder="Your Name" id="cust-name">
-        <input class="form-control mt-2" placeholder="Your Mobile Number" maxlength="10" id="cust-mobile">
-        <select class="form-select mt-2" id="cust-area">
-          <option value="">Select Area</option>
-        </select>
-        <textarea class="form-control mt-2" id="cust-note" placeholder="Any notes..."></textarea>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-        <button class="btn btn-success" onclick="checkout()">Checkout</button>
-      </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your Cart - Eyal Mart</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body onload="loadCartPage()">
+
+  <div class="top-bar">
+    <a href="index.html" class="btn btn-sm btn-outline-primary">← Back</a>
+    <h5 class="mx-3 my-2">🛒 Your Cart</h5>
+  </div>
+
+  <div class="container mt-5 pt-3">
+    <div id="cart-container"></div>
+    <div class="text-end mt-4">
+      <h5>Total: ₹<span id="cart-total">0</span></h5>
+      <a href="checkout.html" class="btn btn-success mt-2">Proceed to Checkout</a>
     </div>
   </div>
-</div>
+
+  <script src="script.js"></script>
+</body>
+</html>
