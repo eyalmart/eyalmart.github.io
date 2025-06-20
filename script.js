@@ -1,62 +1,53 @@
-<script>
-const API_BASE = "https://script.google.com/macros/s/AKfycbyLuncL2wLm9ka528KU4h8R5O6DmZRPQUQrq4xwpGQGuniitZhICdhJPW1oWGTudMZw/exec"; // Your deployed script URL
+const backendUrl = "https://script.google.com/macros/s/AKfycbyLuncL2wLm9ka528KU4h8R5O6DmZRPQUQrq4xwpGQGuniitZhICdhJPW1oWGTudMZw/exec"; // Your deployed URL
 
 function loadProducts() {
-  fetch(`${API_BASE}?action=getProducts`)
-    .then(res => res.json())
-    .then(displayProducts)
-    .catch(err => alert("Error loading products"));
-  
-  fetch(`${API_BASE}?action=getAreas`)
-    .then(res => res.json())
-    .then(data => {
-      allAreas = data;
-      populateAreaDropdown();
-    });
-}
-
-function checkout() {
-  const name = document.getElementById('cust-name').value.trim();
-  const mobile = document.getElementById('cust-mobile').value.trim();
-  const area = document.getElementById('cust-area').value.trim();
-  if (!name || !mobile || !area || !/^[0-9]{10}$/.test(mobile)) return alert("Please fill all required fields.");
-
-  const total = Object.values(cart).reduce((sum, item) => sum + item.qty * item.price, 0);
-
-  fetch(API_BASE, {
+  fetch(backendUrl, {
     method: "POST",
-    body: JSON.stringify({ action: "createOrder", amount: total }),
-    headers: { "Content-Type": "application/json" }
+    body: JSON.stringify({ action: "getProducts" })
   })
   .then(res => res.json())
-  .then(orderData => {
+  .then(products => {
+    allProducts = products;
+    displayProducts(products);
+  });
+
+  fetch(backendUrl, {
+    method: "POST",
+    body: JSON.stringify({ action: "getAreas" })
+  })
+  .then(res => res.json())
+  .then(areas => {
+    allAreas = areas;
+    populateAreaDropdown();
+  });
+}
+
+function startCheckout(order) {
+  fetch(backendUrl, {
+    method: "POST",
+    body: JSON.stringify({ action: "createOrder", amount: order.total })
+  })
+  .then(res => res.json())
+  .then(data => {
     const options = {
-      key: "rzp_live_y28VJYqsSStUvJ",
-      amount: orderData.amount,
+      key: "rzp_live_y28VJYqsSStUvJ", // your key
+      amount: data.amount,
       currency: "INR",
-      name: "Eyal Mart",
-      description: "Order Payment",
-      order_id: orderData.id,
-      handler: function (response) {
-        localStorage.removeItem('eyal_cart');
-        fetch(API_BASE, {
-          method: "POST",
-          body: JSON.stringify({
-            action: "submitOrder",
-            order: {
-              name, mobile, area, cart, total,
-              razorpay_payment_id: response.razorpay_payment_id
-            }
-          }),
-          headers: { "Content-Type": "application/json" }
-        }).then(() => {
-          showThankYouModal(name, total, cart);
-        });
-      },
-      prefill: { name, contact: mobile },
-      theme: { color: "#3399cc" }
+      order_id: data.id,
+      handler: function(response) {
+        order.razorpay_payment_id = response.razorpay_payment_id;
+        submitOrderToBackend(order);
+      }
     };
     new Razorpay(options).open();
   });
 }
-</script>
+
+function submitOrderToBackend(order) {
+  fetch(backendUrl, {
+    method: "POST",
+    body: JSON.stringify({ action: "submitOrder", order })
+  })
+  .then(res => res.json())
+  .then(() => showThankYou(order));
+}
