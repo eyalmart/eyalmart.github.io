@@ -2,33 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Eyal Mart</title>
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="style.css">
+
+  <!-- PWA Support -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#007bff">
+  <link rel="icon" href="icon-192.png" type="image/png">
+
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
-  <!-- Font Awesome for icons if needed -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Top Bar -->
-  <div class="top-bar">
-    <input type="text" class="form-control" id="searchInput" placeholder="Search products" onkeyup="applyFilters()">
-    <button class="cart-btn" onclick="showCartModal()">
-      <i class="fas fa-shopping-cart"></i> <span id="cart-count" class="cart-badge">0</span>
+  <div class="top-bar p-2 bg-white d-flex align-items-center gap-2 shadow-sm sticky-top">
+    <input type="text" class="form-control" id="searchInput" placeholder="Search products..." onkeyup="applyFilters()">
+    <button class="btn btn-primary position-relative" onclick="showCartModal()">🛒
+      <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
     </button>
   </div>
 
-  <!-- Spinner -->
   <div id="spinner" class="d-flex justify-content-center align-items-center" style="height: 300px;">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
+    <div class="spinner-border text-primary" role="status"></div>
   </div>
 
-  <!-- Main Content -->
   <div class="container-fluid mt-4 d-none" id="main-container">
     <h5 class="fw-bold">Category</h5>
     <div id="categoryFilter" class="d-flex flex-wrap gap-2 mb-3"></div>
@@ -44,93 +42,39 @@
   </div>
 
   <!-- Cart Modal -->
-  <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+  <div class="modal fade" id="cartModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="cartModalLabel"><i class="fas fa-shopping-cart"></i> Your Cart</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h5 class="modal-title">🛒 Your Cart</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <div id="cart-items"></div>
           <hr>
           <h6>Total: ₹<span id="cart-total">0</span></h6>
-          <input type="text" class="form-control mt-3 rounded-md" placeholder="Your Name" id="cust-name">
-          <input type="tel" class="form-control mt-2 rounded-md" placeholder="Your Mobile Number (10 digits)" maxlength="10" id="cust-mobile">
-          <select class="form-select mt-2 rounded-md" id="cust-area">
-            <option value="">Select Area</option>
-          </select>
-          <textarea class="form-control mt-2 rounded-md" id="cust-note" placeholder="Any notes..."></textarea>
+          <input class="form-control mt-3" placeholder="Your Name" id="cust-name">
+          <input class="form-control mt-2" placeholder="Your Mobile Number" maxlength="10" id="cust-mobile">
+          <select class="form-select mt-2" id="cust-area"><option value="">Select Area</option></select>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary rounded-md" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-success rounded-md" onclick="checkout()">Checkout</button>
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+          <button class="btn btn-success" onclick="checkout()">Checkout</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Thank You Modal -->
-  <div class="modal fade" id="thankYouModal" tabindex="-1" aria-labelledby="thankYouModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content text-center p-3 rounded-md">
-        <div class="modal-body">
-          <h4 class="text-success">✅ Order Confirmed!</h4>
-          <p>Thank you <strong id="thankName"></strong></p>
-          <p>Total Paid: ₹<strong id="thankTotal"></strong></p>
-          <ul class="list-group mb-3" id="thankItems"></ul>
-          <button type="button" class="btn btn-primary w-100 rounded-md" data-bs-dismiss="modal" onclick="refreshPage()">Continue Shopping</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast Notification Container -->
-  <div id="toast-container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050;"></div>
-
-  <!-- Install App Prompt -->
-  <div id="installPrompt" class="position-fixed bottom-0 start-0 end-0 bg-white p-3 shadow d-none rounded-t-lg" style="z-index:1050">
-    <div class="d-flex justify-content-between align-items-center">
-      <div>
-        <strong>Install Eyal Mart</strong><br>
-        <small>Add this app to your home screen for a better experience!</small>
-      </div>
-      <div>
-        <button class="btn btn-primary btn-sm me-2 rounded-md" id="installBtn">Install</button>
-        <button class="btn btn-sm btn-light rounded-md" onclick="document.getElementById('installPrompt').classList.add('d-none')">✖</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Scripts -->
-  <script src="script.js"></script>
+  <!-- Bootstrap & Razorpay -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  <script>
-    // PWA install logic
-    let deferredPrompt;
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById("installPrompt").classList.remove("d-none");
-    });
-    document.getElementById("installBtn").addEventListener("click", () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
-          deferredPrompt = null;
-          document.getElementById("installPrompt").classList.add("d-none");
-        });
-      }
-    });
 
-    // Register service worker (moved here for standard practice, though was also in script.js)
+  <!-- App Script -->
+  <script src="script.js"></script>
+  <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(reg => console.log('✅ Service Worker Registered:', reg.scope))
-        .catch(err => console.warn('❌ Service Worker Error:', err));
+      navigator.serviceWorker.register('service-worker.js');
     }
   </script>
 </body>
 </html>
-
