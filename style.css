@@ -1,271 +1,146 @@
-/* General Body Styles */
 body {
-  padding-top: 90px; /* Space for fixed top bar */
-  font-family: 'Inter', sans-serif;
-  background-color: #f8f9fa; /* Light background */
-  color: #212529; /* Dark text for readability */
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #ffffff;
+  color: #212529;
+  padding-top: 80px;
 }
 
-/* Top Bar Styling (Fixed header) */
 .top-bar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1030; /* Ensure it stays on top */
   background-color: #ffffff;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid #e0e0e0;
   padding: 10px 15px;
   display: flex;
   align-items: center;
   gap: 10px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03); /* Subtle shadow */
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .top-bar input {
-  flex: 1; /* Allows search input to expand */
-  min-width: 200px;
+  flex: 1;
+  border: 1px solid #ccc;
   border-radius: 6px;
-  border: 1px solid #ddd;
-  padding: 6px 12px;
-  background: #fdfdfd;
-  transition: 0.3s ease-in-out;
-}
-.top-bar input:focus {
-  outline: none;
-  box-shadow: 0 0 6px rgba(0, 123, 255, 0.3); /* Focus glow */
+  padding: 8px 12px;
+  background: #f8f9fa;
 }
 
-/* Cart Button and Badge */
+.top-bar input:focus {
+  outline: none;
+  box-shadow: 0 0 6px rgba(0, 123, 255, 0.3);
+}
+
 .cart-btn {
   position: relative;
-  background: #0d6efd; /* Bootstrap primary blue */
+  background-color: #007bff;
+  color: #fff;
   border: none;
-  color: white;
-  font-size: 20px;
-  padding: 6px 14px;
+  padding: 8px 14px;
+  font-size: 18px;
   border-radius: 6px;
-  cursor: pointer; /* Indicate interactivity */
-  transition: 0.3s ease;
-  animation: popIn 0.4s ease-in-out; /* Initial pop animation */
 }
+
 .cart-btn:hover {
-  background-color: #0b5ed7; /* Darker blue on hover */
-  animation: pulse 0.6s ease-in-out; /* Pulse effect on hover */
+  background-color: #0056b3;
 }
+
 .cart-badge {
   position: absolute;
   top: -6px;
   right: -6px;
-  background-color: #dc3545; /* Red for emphasis */
-  color: white;
+  background-color: #dc3545;
+  color: #fff;
   font-size: 12px;
-  border-radius: 50%;
   padding: 2px 6px;
-  font-weight: bold;
-  animation: pulseBadge 1.5s infinite ease-in-out; /* Infinite pulse for new items */
+  border-radius: 50%;
+  animation: pulseBadge 1.2s infinite ease-in-out;
 }
 
-/* Category Filter Buttons */
 .category-btn {
-  border-radius: 20px; /* Pill shape */
+  border: 1px solid #ccc;
+  border-radius: 20px;
   padding: 6px 14px;
   font-size: 14px;
-  font-weight: 500;
-  border: 1px solid #e0e0e0;
-  background-color: #f8f9fa;
-  color: #333;
-  transition: 0.2s ease;
-  text-transform: capitalize;
+  background-color: #f1f1f1;
   cursor: pointer;
-}
-.category-btn:hover {
-  background-color: #e2e6ea;
-  transform: translateY(-1px); /* Slight lift on hover */
-}
-.category-btn.active {
-  background-color: #0d6efd;
-  color: white;
-  border-color: #0d6efd;
+  transition: all 0.2s ease-in-out;
 }
 
-/* Product Card Styling */
+.category-btn.active {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+
 .product-card {
-  background: #ffffff;
+  border: 1px solid #e0e0e0;
   border-radius: 12px;
   padding: 15px;
-  border: 1px solid #eee;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.02);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  animation: fadeInCard 0.4s ease-in-out; /* Fade-in effect */
-}
-.product-card:hover {
-  transform: scale(1.015); /* Slightly larger on hover */
-  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.05); /* More prominent shadow */
+  background-color: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.03);
 }
 
-/* Product Image */
 .product-image {
   width: 90px;
   height: 90px;
-  object-fit: contain; /* Ensures image fits without distortion */
+  object-fit: contain;
   border-radius: 8px;
-  background-color: #f8f9fa;
   border: 1px solid #e3e3e3;
-  transition: transform 0.3s ease;
-}
-.product-image:hover {
-  transform: rotate(2deg) scale(1.05); /* Fun rotation effect on hover */
+  background-color: #fafafa;
 }
 
-/* Product Info and Price */
 .product-name {
   font-weight: 600;
   font-size: 1rem;
-  margin-bottom: 4px;
-  color: #222;
-}
-.product-price {
-  font-size: 0.95rem;
-  color: #28a745; /* Green for price */
-  margin-bottom: 10px;
 }
 
-/* Quantity Controls */
+.product-price {
+  font-size: 0.95rem;
+  color: #28a745;
+  margin-bottom: 5px;
+}
+
 .qty-controls {
   display: flex;
   align-items: center;
   gap: 6px;
+  margin-top: 6px;
 }
+
 .qty-controls input {
   width: 50px;
   text-align: center;
-  padding: 4px 6px;
-  border-radius: 6px;
+  padding: 4px;
+  border-radius: 4px;
   border: 1px solid #ccc;
-  background: #fdfdfd;
-  transition: box-shadow 0.2s;
-}
-.qty-controls input:focus {
-  outline: none;
-  box-shadow: 0 0 4px rgba(13, 110, 253, 0.4); /* Focus glow on input */
 }
 
-/* Button Styles (General) */
 .btn-success {
-  background-color: #198754; /* Green for success/add */
+  background-color: #198754;
   border: none;
-  transition: all 0.3s ease-in-out;
 }
+
 .btn-success:hover {
   background-color: #157347;
-  animation: bounce 0.4s ease; /* Bounce effect on hover */
-}
-.btn-outline-secondary {
-  border-color: #ced4da;
-  color: #495057;
-}
-.btn-outline-secondary:hover {
-  background-color: #f1f3f5;
 }
 
-/* Collapse for More Details */
-.collapse {
-  transition: all 0.3s ease-in-out;
-}
-.collapse.show {
-  animation: slideDown 0.3s ease-in-out;
-}
-
-/* List Group Items (Cart Modal) */
-.list-group-item {
-  font-size: 0.95rem;
-  color: #1a1a1a;
-}
-.text-muted {
-  color: #6c757d !important;
-}
-
-/* Install Prompt Animation */
-#installPrompt {
-  animation: slideUp 0.3s ease-in-out;
-  border-top-left-radius: 12px; /* Rounded top corners */
-  border-top-right-radius: 12px;
-}
-
-/* Toast Container Styling */
-#toast-container {
-    padding: 1rem;
-    pointer-events: none; /* Allows clicks to pass through */
-}
-.toast-message {
-    background-color: rgba(40, 167, 69, 0.9); /* Green for success */
-    color: white;
-    padding: 0.75rem 1.25rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
-    margin-bottom: 0.5rem;
-    pointer-events: auto; /* Allows interaction if needed, but not here */
-}
-.toast-message.show {
-    opacity: 1;
-}
-.toast-message.error {
-    background-color: rgba(220, 53, 69, 0.9); /* Red for error */
-}
-
-
-/* Keyframe Animations */
-@keyframes slideDown {
-  0% { opacity: 0; transform: translateY(-5px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-@keyframes slideUp {
-  0% { opacity: 0; transform: translateY(30px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-}
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-}
 @keyframes pulseBadge {
   0%, 100% { transform: scale(1); opacity: 1; }
   50% { transform: scale(1.2); opacity: 0.8; }
 }
-@keyframes fadeInCard {
-  0% { opacity: 0; transform: scale(0.96); }
-  100% { opacity: 1; transform: scale(1); }
-}
-@keyframes popIn {
-  0% { transform: scale(0.8); opacity: 0.7; }
-  100% { transform: scale(1); opacity: 1; }
-}
 
-/* Responsive Adjustments */
 @media (max-width: 768px) {
   .top-bar {
-    flex-direction: row; /* Keep elements in a row */
-    align-items: center;
+    flex-direction: row;
     justify-content: space-between;
   }
 
-  .top-bar input {
-    font-size: 14px;
-  }
-
-  .cart-btn {
-    font-size: 18px;
-  }
-
   .product-image {
-    width: 75px;
-    height: 75px;
+    width: 70px;
+    height: 70px;
   }
 
   .product-name {
