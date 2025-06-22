@@ -1,4 +1,4 @@
-const BACKEND_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+const BACKEND_URL = "https://script.google.com/macros/s/AKfycbyLuncL2wLm9ka528KU4h8R5O6DmZRPQUQrq4xwpGQGuniitZhICdhJPW1oWGTudMZw/exec";
 
 let allProducts = [];
 let allAreas = [];
@@ -87,7 +87,7 @@ function checkout() {
     .then(res => res.json())
     .then(order => {
       const options = {
-        key: "rzp_live_xxxxxxxxxx", // Replace with your real key
+        key: "rzp_live_y28VJYqsSStUvJ", // Replace with your real key
         amount: order.amount,
         currency: "INR",
         name: "Eyal Mart",
